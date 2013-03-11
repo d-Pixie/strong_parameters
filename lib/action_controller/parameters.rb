@@ -22,7 +22,7 @@ module ActionController
 
     def initialize(params)
       @params = params
-      super("found unpermitted parameters: #{params.join(", ")}")
+      super("found unpermitted parameter(s): #{params.join(", ")}")
     end
   end
 
@@ -51,8 +51,13 @@ module ActionController
       self
     end
 
-    def require(key)
-      self[key].presence || raise(ActionController::ParameterMissing.new(key))
+    def require(*keys)
+      if keys.length > 1
+        require_multi(keys)
+      else
+        key = keys.first 
+        self[key].presence || raise(ActionController::ParameterMissing.new(key))
+      end
     end
 
     alias :required :require
@@ -98,6 +103,16 @@ module ActionController
     end
 
     protected
+
+      def require_multi(keys)
+        missing_keys = keys.select do |key|
+          not self[key].presence
+        end
+
+        missing_keys.compact.empty? || raise(ActionController::ParameterMissing.new(missing_keys.join(', ')))
+        self
+      end
+
       def convert_value(value)
         if value.class == Hash
           self.class.new_from_hash_copying_default(value)
@@ -217,7 +232,7 @@ module ActionController
         if unpermitted_keys.any?  
           case self.class.action_on_unpermitted_parameters  
           when :log  
-            ActionController::Base.logger.info "Unpermitted parameters: #{unpermitted_keys.join(", ")}"
+            ActionController::Base.logger.info "Unpermitted parameter(s): #{unpermitted_keys.join(", ")}"
           when :raise  
             raise ActionController::UnpermittedParameters.new(unpermitted_keys)  
           end  
@@ -234,7 +249,7 @@ module ActionController
 
     included do
       rescue_from(ActionController::ParameterMissing) do |parameter_missing_exception|
-        render :text => "Required parameter missing: #{parameter_missing_exception.param}", :status => :bad_request
+        render :text => "Required parameter(s) missing: #{parameter_missing_exception.param}", :status => :bad_request
       end
     end
 
