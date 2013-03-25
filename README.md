@@ -77,7 +77,7 @@ In some cases you might want to require several parameters to be present before 
 params.require(:username, :password).permit(:version)
 ```
 
-When used with multiple inputs `permit` raises a `ActionController::MissingParameter` error with *all* the missing attributes specified in the message. If no values are missing the params hash is returned unmodified.
+When used with multiple inputs `require` raises a `ActionController::MissingParameter` error with *all* the missing attributes specified in the message. If no values are missing the params hash is returned unmodified.
 
 ## Handling of Unpermitted Keys
 
