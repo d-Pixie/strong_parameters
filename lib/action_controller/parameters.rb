@@ -103,7 +103,7 @@ module ActionController
 
     protected
 
-      def require_single(key)
+      def require_single(keys)
         key = keys.first 
         self[key].presence || raise(ActionController::ParameterMissing.new(key))
       end
