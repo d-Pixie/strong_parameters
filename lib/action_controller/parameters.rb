@@ -52,11 +52,10 @@ module ActionController
     end
 
     def require(*keys)
-      if keys.length > 1
-        require_multi(keys)
+      if keys.many?
+        require_multiple(keys)
       else
-        key = keys.first 
-        self[key].presence || raise(ActionController::ParameterMissing.new(key))
+        require_single(keys)
       end
     end
 
@@ -104,9 +103,14 @@ module ActionController
 
     protected
 
-      def require_multi(keys)
+      def require_single(key)
+        key = keys.first 
+        self[key].presence || raise(ActionController::ParameterMissing.new(key))
+      end
+
+      def require_multiple(keys)
         missing_keys = keys.select do |key|
-          not self[key].presence
+          self[key].blank?
         end
 
         missing_keys.compact.empty? || raise(ActionController::ParameterMissing.new(missing_keys.join(', ')))
