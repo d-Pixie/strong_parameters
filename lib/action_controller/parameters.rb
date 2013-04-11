@@ -102,7 +102,6 @@ module ActionController
     end
 
     protected
-
       def require_single(keys)
         key = keys.first 
         self[key].presence || raise(ActionController::ParameterMissing.new(key))
@@ -113,7 +112,7 @@ module ActionController
           self[key].blank?
         end
 
-        missing_keys.compact.empty? || raise(ActionController::ParameterMissing.new(missing_keys.join(', ')))
+        raise(ActionController::ParameterMissing.new(missing_keys.join(', '))) if missing_keys.compact.any?
         self
       end
 
@@ -128,7 +127,6 @@ module ActionController
       end
 
     private
-
       def convert_hashes_to_parameters(key, value)
         if value.is_a?(Parameters) || !value.is_a?(Hash)
           value
